@@ -11,7 +11,7 @@ const AuthLayout = () => {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const isAuth = await authUtils.isAuthenticated
+            const isAuth = await authUtils.isAuthenticated()
             if (!isAuth) {
                 setLoading(false)
             } else {
