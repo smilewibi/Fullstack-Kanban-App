@@ -1,18 +1,27 @@
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
-import StarOutlinedIcon from '@mui/icons-material/StarOutlined'
-import { Box, IconButton, TextField, Typography, Button, Divider } from '@mui/material'
 import { useEffect, useState } from 'react'
 import {  useParams } from 'react-router-dom'
+import { Box, IconButton, TextField, Typography, Button, Divider } from '@mui/material'
+import StarOutlinedIcon from '@mui/icons-material/StarOutlined'
+import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import { useDispatch, useSelector } from 'react-redux'
 import boardApi from '../api/boardApi'
+import EmojiPicker from '../components/common/EmojiPicker'
+import { setBoards } from '../redux/features/boardSlice'
+
+let timer
+const timeout = 500
 
 const Board = () => {
+  const dispatch = useDispatch()
   const { boardId } = useParams()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [sections, setSections] = useState([])
   const [isFavourite, setIsFavourite] = useState(false)
   const [icon, setIcon] = useState('')
+
+  const boards = useSelector((state) => state.board.value)
 
   useEffect(() => {
     const getBoard = async () => {
@@ -29,6 +38,59 @@ const Board = () => {
     }
     getBoard()
   }, [boardId])
+
+  const onIconChange = async (newIcon) => {
+    let temp = [...boards]
+    const index = temp.findIndex(e => e.id === boardId)
+    temp[index] = { ...temp[index], icon: newIcon }
+    setIcon(newIcon)
+    dispatch(setBoards(temp))
+    try {
+      await boardApi.update(boardId, { icon: newIcon })
+    } catch (err) {
+      alert(err)
+    }
+  }
+
+  const updateTitle = async (e) => {
+    clearTimeout(timer)
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    
+    let temp = [...boards]
+    const index = temp.findIndex(e => e.id === boardId)
+    temp[index] = { ...temp[index], title: newTitle }
+    setTitle(newTitle)
+    dispatch(setBoards(temp))
+
+    timer = setTimeout(async () => {
+      try {
+        await boardApi.update(boardId, { title: newTitle })
+      } catch (err) {
+        alert(err)
+      }
+    }, timeout)
+  }
+
+  const updateDescription = async (e) => {
+    clearTimeout(timer)
+    const newDescription = e.target.value
+    setDescription(newDescription)
+    
+    let temp = [...boards]
+    const index = temp.findIndex(e => e.id === boardId)
+    temp[index] = { ...temp[index], description: newDescription }
+    setDescription(newDescription)
+    dispatch(setBoards(temp))
+
+    timer = setTimeout(async () => {
+      try {
+        await boardApi.update(boardId, { description: newDescription })
+      } catch (err) {
+        alert(err)
+      }
+    }, timeout)
+  }
 
   return (
     <>
@@ -54,10 +116,10 @@ const Board = () => {
       <Box sx={{ padding: '10px 50px' }}>
         <Box>
           {/* emoji picker */}
-        </Box>
-        <TextField
+          <EmojiPicker icon={icon} onChange={onIconChange} />
+          <TextField
             value={title}
-            // onChange={updateDescription}
+            onChange={updateTitle}
             placeholder='Untitled'
             variant='outlined'
             fullWidth
@@ -69,7 +131,7 @@ const Board = () => {
           />
           <TextField
             value={description}
-            // onChange={updateDescription}
+            onChange={updateDescription}
             placeholder='Add a description'
             variant='outlined'
             multiline
@@ -80,6 +142,7 @@ const Board = () => {
               '& .MuiOutlinedInput-root': { fontSize: '0.8rem' }
             }}
           />
+          </Box>
           <Box>
             <Box sx={{
               display: 'flex',
