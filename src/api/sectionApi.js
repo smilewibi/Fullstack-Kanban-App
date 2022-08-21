@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient"
+import axiosClient from './axiosClient'
 
 const sectionApi = {
   create: (boardId) => axiosClient.post(`boards/${boardId}/sections`),
