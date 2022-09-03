@@ -1,5 +1,5 @@
 import { Backdrop, Fade, IconButton, Modal, Box, TextField, Typography, Divider } from '@mui/material'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import Moment from 'moment'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
@@ -48,10 +48,9 @@ const TaskModal = props => {
     setTimeout(() => {
       if (editorWrapperRef.current) {
         const box = editorWrapperRef.current
-        box.querySelector('.ck-editor__editable_inline').style.height = (box.offsetHeight - 50) +
-        'px'
+        box.querySelector('.ck-editor__editable_inline').style.height = (box.offsetHeight - 50) + 'px'
       }
-    }, timeout);
+    }, timeout)
   }
 
   const onClose = () => {
@@ -73,7 +72,7 @@ const TaskModal = props => {
   const updateTitle = async (e) => {
     clearTimeout(timer)
     const newTitle = e.target.value
-    timer = setTimeout(async() => {
+    timer = setTimeout(async () => {
       try {
         await taskApi.update(boardId, task.id, { title: newTitle })
       } catch (err) {
@@ -86,9 +85,11 @@ const TaskModal = props => {
     props.onUpdate(task)
   }
 
-  const updateContent =async (event, editor) => {
+  const updateContent = async (event, editor) => {
     clearTimeout(timer)
     const data = editor.getData()
+
+    // console.log({ isModalClosed })
 
     if (!isModalClosed) {
       timer = setTimeout(async () => {
@@ -122,7 +123,7 @@ const TaskModal = props => {
             width: '100%'
           }}>
             <IconButton variant='outlined' color='error' onClick={deleteTask}>
-              <DeleteOutlinedIcon/>
+              <DeleteOutlinedIcon />
             </IconButton>
           </Box>
           <Box sx={{
@@ -143,15 +144,16 @@ const TaskModal = props => {
                 '& .MuiOutlinedInput-notchedOutline': { border: 'unset ' },
                 '& .MuiOutlinedInput-root': { fontSize: '2.5rem', fontWeight: '700' },
                 marginBottom: '10px'
-            }}
+              }}
             />
             <Typography variant='body2' fontWeight='700'>
-              {task !== undefined ? Moment(task.createAt).format('YYYY-MM-DD') : ''}
+              {task !== undefined ? Moment(task.createdAt).format('YYYY-MM-DD') : ''}
             </Typography>
             <Divider sx={{ margin: '1.5rem 0' }} />
             <Box
               ref={editorWrapperRef}
               sx={{
+                position: 'relative',
                 height: '80%',
                 overflowX: 'hidden',
                 overflowY: 'auto'
@@ -162,7 +164,7 @@ const TaskModal = props => {
                 data={content}
                 onChange={updateContent}
                 onFocus={updateEditorHeight}
-                obBlur={updateEditorHeight}
+                onBlur={updateEditorHeight}
               />
             </Box>
           </Box>
